@@ -43,7 +43,7 @@
 - (UIImageView *)titleImageView {
     if (!_titleImageView) {
         UIImage *image = [UIImage imageNamed:@"icon_spacex_logo"];
-        _titleImageView = [[UIImageView alloc] initWithImage:[image hjk_imageWithTintColor:[UIColor whiteColor]]];
+        _titleImageView = [[UIImageView alloc] initWithImage:[image esui_imageWithTintColor:[UIColor whiteColor]]];
     }
     return _titleImageView;
 }

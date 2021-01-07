@@ -26,7 +26,7 @@
 - (void)initSubviews {
     self.selectionStyle = UITableViewCellSelectionStyleNone;
     self.cardView = [UIView new];
-    self.cardView.backgroundColor = [UIColor hjk_colorWithHexString:@"#F7110D"];
+    self.cardView.backgroundColor = [UIColor esui_colorWithHexString:@"#F7110D"];
     self.cardView.layer.cornerRadius = 13.0;
     if (@available(iOS 13.0, *)) {
         self.cardView.layer.cornerCurve = kCACornerCurveCircular;

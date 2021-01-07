@@ -65,21 +65,21 @@
 
 - (void)socket {
     NSURL *url = [NSURL URLWithString:@"project://home/category/websocket"];
-    [HJKRouter.global pushURL:url context:nil from:self.navigationController animated:YES completion:^{
+    [ESCPRouter.global pushURL:url context:nil from:self.navigationController animated:YES completion:^{
         
     }];
 }
 
 - (void)demo {
     NSURL *url = [NSURL URLWithString:@"project://home/category/demo"];
-    [HJKRouter.global pushURL:url context:nil from:self.navigationController animated:YES completion:^{
+    [ESCPRouter.global pushURL:url context:nil from:self.navigationController animated:YES completion:^{
         
     }];
 }
 
 - (void)list {
     NSURL *url = [NSURL URLWithString:@"project://home/category/list"];
-    [HJKRouter.global pushURL:url context:nil from:self.navigationController animated:YES completion:^{
+    [ESCPRouter.global pushURL:url context:nil from:self.navigationController animated:YES completion:^{
         
     }];
 }
@@ -99,7 +99,7 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     CGFloat width = ScreenWidth;
-    UIEdgeInsets safeAreaInsets = HJKHelper.safeAreaInsetsForDeviceWithNotch;
+    UIEdgeInsets safeAreaInsets = ESUIHelper.safeAreaInsetsForDeviceWithNotch;
     CGFloat cellWidth = width - safeAreaInsets.left - safeAreaInsets.right;
     return cellWidth * 0.33;
 }

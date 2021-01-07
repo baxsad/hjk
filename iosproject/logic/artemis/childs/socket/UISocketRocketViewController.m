@@ -7,8 +7,6 @@
 //
 
 #import "UISocketRocketViewController.h"
-#import "SIMManager.h"
-#import <Masonry/Masonry.h>
 
 @interface UISocketRocketViewController () <SIMMessageListener,SIMConnListener>
 @property (nonatomic, strong) UIButton *protocolButton;

@@ -130,7 +130,7 @@
 - (void)didInitialize {
     [super didInitialize];
     
-    self.hjk_preferredStatusBarStyleBlock = ^UIStatusBarStyle{
+    self.esui_preferredStatusBarStyleBlock = ^UIStatusBarStyle{
         if (@available(iOS 13.0, *)) {
             return UIStatusBarStyleDarkContent;
         } else {
@@ -155,7 +155,7 @@
     [self.view addSubview:self.headerStatusView];
     [self.headerStatusView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.equalTo(self.view);
-        make.top.equalTo(self.view).offset(HJKHelper.navigationContentHeightConstant);
+        make.top.equalTo(self.view).offset(ESUIHelper.navigationContentHeightConstant);
         make.height.mas_equalTo(64);
     }];
     
@@ -201,7 +201,7 @@
     [self.listView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.equalTo(self.view);
         make.top.equalTo(self.headerStatusView.mas_bottom);
-        make.bottom.equalTo(self.view).offset(-HJKHelper.safeAreaInsetsForDeviceWithNotch.bottom);
+        make.bottom.equalTo(self.view).offset(-ESUIHelper.safeAreaInsetsForDeviceWithNotch.bottom);
     }];
 }
 
@@ -251,7 +251,7 @@
 
 - (nullable UIImage *)navigationBarBackgroundImage {
     UIColor *color = [UIColor whiteColor];
-    return [UIImage hjk_imageWithColor:color size:CGSizeMake(4, 4) cornerRadius:0];
+    return [UIImage esui_imageWithColor:color size:CGSizeMake(4, 4) cornerRadius:0];
 }
 
 - (nullable UIColor *)navigationBarTintColor {

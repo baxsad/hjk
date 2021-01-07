@@ -14,15 +14,11 @@
 #import <AppTrackingTransparency/AppTrackingTransparency.h>
 #import <Masonry/Masonry.h>
 #import <WebKit/WebKit.h>
-#import "HJKPing.h"
-#import "HJKTraceroute.h"
-#import "HJKDevice.h"
-#import "HJKHostTools.h"
 
-@interface UINetDiagnosisViewController () <HJKPingDelegate, HJKTracerouteDelegate>
+@interface UINetDiagnosisViewController () <ESCPPingDelegate, ESCPTracerouteDelegate>
 @property (nonatomic, strong) AFURLSessionManager *sessionManager;
-@property (nonatomic, strong) HJKPing *ping;
-@property (nonatomic, strong) HJKTraceroute *traceroute;
+@property (nonatomic, strong) ESCPPing *ping;
+@property (nonatomic, strong) ESCPTraceroute *traceroute;
 @property (nonatomic, strong) UITextView *textView;
 @end
 
@@ -34,13 +30,13 @@
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     self.sessionManager = [[AFURLSessionManager alloc] initWithSessionConfiguration:config];
     
-    self.ping = [[HJKPing alloc] init];
+    self.ping = [[ESCPPing alloc] init];
     self.ping.delegate = self;
     
-    self.traceroute = [[HJKTraceroute alloc] initWithMaxTTL:TRACEROUTE_MAX_TTL
-                                                    timeout:TRACEROUTE_TIMEOUT
-                                                maxAttempts:TRACEROUTE_ATTEMPTS
-                                                       port:TRACEROUTE_PORT];
+    self.traceroute = [[ESCPTraceroute alloc] initWithMaxTTL:TRACEROUTE_MAX_TTL
+                                                     timeout:TRACEROUTE_TIMEOUT
+                                                 maxAttempts:TRACEROUTE_ATTEMPTS
+                                                        port:TRACEROUTE_PORT];
     self.traceroute.delegate = self;
 }
 
@@ -55,16 +51,16 @@
     
     self.textView.text = @"";
     NSMutableString *info = [[NSMutableString alloc] initWithString:self.textView.text];
-    [info appendFormat:@"Application Name：%@\n",[HJKDevice getApplicationName]];
-    [info appendFormat:@"Application Version：%@\n",[HJKDevice getApplicationVersion]];
-    [info appendFormat:@"Machine Type：%@\n",[HJKDevice getDeviceName]];
-    [info appendFormat:@"System Version：%@\n",[HJKDevice getDeviceVersion]];
-    [info appendFormat:@"Operator：%@\n",[HJKDevice getOperatorName]];
-    [info appendFormat:@"NetWork Type：%@\n",[HJKDevice getNetWorkType]];
-    [info appendFormat:@"Local Native IP：%@\n",[HJKHostTools localNativeIPAddress]];
-    [info appendFormat:@"Local Gateway IP：%@\n",[HJKHostTools localGatewayIPAddress]];
-    [info appendFormat:@"Local DNS：%@\n",[HJKHostTools localDNSServers].description];
-    [info appendFormat:@"Domain name resolution results：%@\n",[HJKHostTools remoteDNSServersWithHost:@"www.biyao.com"].description];
+    [info appendFormat:@"Application Name：%@\n",[ESCPDevice getApplicationName]];
+    [info appendFormat:@"Application Version：%@\n",[ESCPDevice getApplicationVersion]];
+    [info appendFormat:@"Machine Type：%@\n",[ESCPDevice getDeviceName]];
+    [info appendFormat:@"System Version：%@\n",[ESCPDevice getDeviceVersion]];
+    [info appendFormat:@"Operator：%@\n",[ESCPDevice getOperatorName]];
+    [info appendFormat:@"NetWork Type：%@\n",[ESCPDevice getNetWorkType]];
+    [info appendFormat:@"Local Native IP：%@\n",[ESCPHostTools localNativeIPAddress]];
+    [info appendFormat:@"Local Gateway IP：%@\n",[ESCPHostTools localGatewayIPAddress]];
+    [info appendFormat:@"Local DNS：%@\n",[ESCPHostTools localDNSServers].description];
+    [info appendFormat:@"Domain name resolution results：%@\n",[ESCPHostTools remoteDNSServersWithHost:@"www.biyao.com"].description];
     [info appendString:@"Start Ping：www.biyao.com\n"];
     self.textView.text = info;
     
@@ -87,7 +83,7 @@
     }];
 }
 
-#pragma mark - <HJKPingDelegate>
+#pragma mark - <ESCPPingDelegate>
 
 - (void)appendPingLog:(NSString *)pingLog {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -109,7 +105,7 @@
     });
 }
 
-#pragma mark - <HJKTracerouteDelegate>
+#pragma mark - <ESCPTracerouteDelegate>
 
 - (void)appendRouteLog:(NSString *)routeLog {
     dispatch_async(dispatch_get_main_queue(), ^{

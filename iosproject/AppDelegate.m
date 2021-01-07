@@ -24,13 +24,10 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [GLobalRealReachability startNotifier];
     
-    CGSize screenSize = [UIScreen mainScreen].bounds.size;
-    NSLog(@"%@",NSStringFromCGSize(screenSize));
-    
     /**
      * Register routes
      */
-    [HJKRouter.global register:@"project://home/category/:action/" factory:^UIViewController * _Nullable(NSDictionary *info, id _Nullable context) {
+    [ESCPRouter.global register:@"project://home/category/:action/" factory:^UIViewController * _Nullable(NSDictionary *info, id _Nullable context) {
         if ([[info objectForKey:@"action"] isEqualToString:@"websocket"]) {
             UISocketRocketViewController *socket = [[UISocketRocketViewController alloc] init];
             return socket;
@@ -62,32 +59,32 @@
 @implementation AppDelegate (Appearance)
 
 - (void)makeDefaultAppearance {
-    UIColor *barTintColor = [UIColor hjk_colorWithHexString:@"#0c5cde"];
-    UIImage *barBackgroundImage = [UIImage hjk_imageWithColor:barTintColor];
-    UIImage *barShadowImage = [UIImage hjk_imageWithColor:UIColor.clearColor
-                                                     size:CGSizeMake(4, 1.0/UIScreen.mainScreen.scale)
-                                             cornerRadius:0];
+    UIColor *barTintColor = [UIColor esui_colorWithHexString:@"#0c5cde"];
+    UIImage *barBackgroundImage = [UIImage esui_imageWithColor:barTintColor];
+    UIImage *barShadowImage = [UIImage esui_imageWithColor:UIColor.clearColor
+                                                      size:CGSizeMake(4, 1.0/UIScreen.mainScreen.scale)
+                                              cornerRadius:0];
     
-    HJKUICMI.viewControllerBackgroundColor = [UIColor whiteColor];
-    HJKUICMI.statusbarStyleLightInitially = YES;
-    HJKUICMI.navBarStyle = UIBarStyleDefault;
-    HJKUICMI.navBarBackgroundImage = barBackgroundImage;
-    HJKUICMI.navBarShadowImage = barShadowImage;
-    HJKUICMI.navBarTitleColor = [UIColor whiteColor];
-    HJKUICMI.navBarTintColor = [UIColor whiteColor];
-    HJKUICMI.tabBarStyle = UIBarStyleDefault;
-    HJKUICMI.tabBarBackgroundImage = [UIImage hjk_imageWithColor:[UIColor hjk_colorWithHexString:@"#fefefe"]];
-    HJKUICMI.tabBarItemTitleColor = [UIColor hjk_colorWithHexString:@"#888888"];
-    HJKUICMI.tabBarItemTitleColorSelected = [UIColor hjk_colorWithHexString:@"#0c5cde"];
-    HJKUICMI.tabBarItemImageColor = [UIColor hjk_colorWithHexString:@"#888888"];
-    HJKUICMI.tabBarItemImageColorSelected = [UIColor hjk_colorWithHexString:@"#0c5cde"];
+    ESUICMI.viewControllerBackgroundColor = [UIColor whiteColor];
+    ESUICMI.statusbarStyleLightInitially = YES;
+    ESUICMI.navBarStyle = UIBarStyleDefault;
+    ESUICMI.navBarBackgroundImage = barBackgroundImage;
+    ESUICMI.navBarShadowImage = barShadowImage;
+    ESUICMI.navBarTitleColor = [UIColor whiteColor];
+    ESUICMI.navBarTintColor = [UIColor whiteColor];
+    ESUICMI.tabBarStyle = UIBarStyleDefault;
+    ESUICMI.tabBarBackgroundImage = [UIImage esui_imageWithColor:[UIColor esui_colorWithHexString:@"#fefefe"]];
+    ESUICMI.tabBarItemTitleColor = [UIColor esui_colorWithHexString:@"#888888"];
+    ESUICMI.tabBarItemTitleColorSelected = [UIColor esui_colorWithHexString:@"#0c5cde"];
+    ESUICMI.tabBarItemImageColor = [UIColor esui_colorWithHexString:@"#888888"];
+    ESUICMI.tabBarItemImageColorSelected = [UIColor esui_colorWithHexString:@"#0c5cde"];
 }
 @end
 
 @implementation AppDelegate (KeyWindow)
 
 - (void)makeKeyWindowAndVisible {
-    self.window = [[HJKWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
+    self.window = [[ESUIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
     if (@available(iOS 13.0, *)) {
         [self.window setBackgroundColor:[UIColor systemBackgroundColor]];
     } else {
@@ -95,21 +92,21 @@
     }
     
     UIArtemisViewController *artemis = [[UIArtemisViewController alloc] init];
-    HJKNavigationController *artemisNavigation = [[HJKNavigationController alloc] initWithRootViewController:artemis];
+    ESUIBaseNavigationController *artemisNavigation = [[ESUIBaseNavigationController alloc] initWithRootViewController:artemis];
     artemisNavigation.tabBarItem.title = @"Artemis";
     artemisNavigation.tabBarItem.image = [UIImage imageNamed:@"icon_tabbar_artemis"];
     
     UINasaViewController *nasa = [[UINasaViewController alloc] init];
-    HJKNavigationController *nasaNavigation = [[HJKNavigationController alloc] initWithRootViewController:nasa];
+    ESUIBaseNavigationController *nasaNavigation = [[ESUIBaseNavigationController alloc] initWithRootViewController:nasa];
     nasaNavigation.tabBarItem.title = @"NASA";
     nasaNavigation.tabBarItem.image = [UIImage imageNamed:@"icon_tabbar_nasa"];
     
     UISpaceXViewController *spacex = [[UISpaceXViewController alloc] init];
-    HJKNavigationController *spacexNavigation = [[HJKNavigationController alloc] initWithRootViewController:spacex];
+    ESUIBaseNavigationController *spacexNavigation = [[ESUIBaseNavigationController alloc] initWithRootViewController:spacex];
     spacexNavigation.tabBarItem.title = @"SpaceX";
     spacexNavigation.tabBarItem.image = [UIImage imageNamed:@"icon_tabbar_spacex"];
 
-    HJKTabBarController *root = [[HJKTabBarController alloc] init];
+    ESUIBaseTabBarController *root = [[ESUIBaseTabBarController alloc] init];
     root.viewControllers = @[artemisNavigation,nasaNavigation,spacexNavigation];
     [self.window setRootViewController:root];
     [self.window makeKeyAndVisible];

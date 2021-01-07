@@ -16,25 +16,17 @@
 #import <AFNetworking/AFNetworking.h>
 #import <SDWebImage/SDWebImage.h>
 
-
 #pragma mark - CommonLib
 
 #import "MJExtension.h"
 
-#pragma mark - Core
+#pragma mark - ESUIKit
 
-#import "HJKCore.h"
+#import "ESUIKit.h"
 
-#pragma mark - Categories
+#pragma mark - ESCPKit
 
-#import "HJKCategories.h"
+#import "ESCPKit.h"
 
 #pragma mark - Components
 
-#import "HJKRouter.h"
-#import "HJKNetDiagnosis.h"
-#import "SIMManager.h"
-
-#pragma mark - Base
-
-#import "HJKBase.h"
