@@ -7,6 +7,7 @@
 //
 
 #import "UIViewController+NavigationBarTransition.h"
+#import "UINavigationBar+NavigationBarTransition.h"
 #import "UILabel+NavigationBarTransition.h"
 #import "ESUINavigationBarTransitionDelegate.h"
 #import "ESUINavigationBarAppearanceDelegate.h"
@@ -22,12 +23,65 @@ typedef UIViewController<ESUINavigationBarAppearanceDelegate> ESUIBarAppearanceC
 + (void)load {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        OverrideInstanceImplementation([UINavigationController class], @selector(esui_didInitialize), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
+            return ^(UINavigationController *selfObject) {
+                void (*originSelectorIMP)(id, SEL);
+                originSelectorIMP = (void (*)(id, SEL))originalIMPProvider();
+                originSelectorIMP(selfObject, originCMD);
+                
+                [selfObject esui_addNavigationActionDidChangeBlock:^(ESUINavigationAction action, BOOL animated, __kindof UINavigationController * _Nullable weakNavigationController, __kindof UIViewController * _Nullable appearingViewController, NSArray<__kindof UIViewController *> * _Nullable disappearingViewControllers) {
+                    /**
+                     * 左右两个界面都必须存在
+                     */
+                    UIViewController *disappearingViewController = disappearingViewControllers.lastObject;
+                    if (!appearingViewController || !disappearingViewController) {
+                        return;
+                    }
+                    
+                    switch (action) {
+                        case ESUINavigationActionWillPush: {
+                            if ([weakNavigationController shouldCustomTransitionAutomaticallyForOperation:UINavigationControllerOperationPush
+                                                                                      firstViewController:disappearingViewController
+                                                                                     secondViewController:appearingViewController]) {
+                                [disappearingViewController addTransitionNavigationBarIfNeeded];
+                                disappearingViewController.prefersNavigationBarBackgroundViewHidden = YES;
+                            }
+                        }
+                            break;
+                        case ESUINavigationActionWillPop:
+                        case ESUINavigationActionWillSet: {
+                            if ([weakNavigationController shouldCustomTransitionAutomaticallyForOperation:UINavigationControllerOperationPop
+                                                                                      firstViewController:disappearingViewController
+                                                                                     secondViewController:appearingViewController]) {
+                                [disappearingViewController addTransitionNavigationBarIfNeeded];
+                                if (appearingViewController.transitionNavigationBar) {
+                                    [UIViewController replaceStyleForNavigationBar:appearingViewController.transitionNavigationBar
+                                                                 withNavigationBar:weakNavigationController.navigationBar];
+                                }
+                                disappearingViewController.prefersNavigationBarBackgroundViewHidden = YES;
+                            }
+                        }
+                            break;
+                        case ESUINavigationActionDidPop: {
+                            if (@available(iOS 13.0, *)) { } else {
+                                [appearingViewController renderNavigationTitleStyleAnimated:animated];
+                                [weakNavigationController esui_animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+                                    [appearingViewController renderNavigationTitleStyleAnimated:animated];
+                                }];
+                            }
+                        }
+                            break;
+                            
+                        default:
+                            break;
+                    }
+                }];
+            };
+        });
+        
         OverrideInstanceImplementation([UIViewController class], @selector(viewWillAppear:), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
             return ^(UIViewController *selfObject, BOOL firstArgv) {
-                /**
-                 * 放在最前面，留一个时机给业务可以覆盖
-                 */
-                [selfObject renderNavigationStyleInViewController:selfObject animated:firstArgv];
+                [selfObject renderNavigationBarStyleAnimated:firstArgv];
                 
                 void (*originSelectorIMP)(id, SEL, BOOL);
                 originSelectorIMP = (void (*)(id, SEL, BOOL))originalIMPProvider();
@@ -37,30 +91,7 @@ typedef UIViewController<ESUINavigationBarAppearanceDelegate> ESUIBarAppearanceC
         
         OverrideInstanceImplementation([UIViewController class], @selector(viewDidAppear:), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
             return ^(UIViewController *selfObject, BOOL firstArgv) {
-                selfObject.lockTransitionNavigationBar = YES;
-                
-                if (selfObject.transitionNavigationBar) {
-                    /**
-                     * 页面展示完毕的时候把假navBar的样式应用到真navBar上
-                     */
-                    [UIViewController replaceStyleForNavigationBar:selfObject.transitionNavigationBar
-                                                 withNavigationBar:selfObject.navigationController.navigationBar];
-                    
-                    /**
-                     * 移除假的navBar
-                     */
-                    [selfObject removeTransitionNavigationBar];
-                    
-                    id <UIViewControllerTransitionCoordinator> transitionCoordinator = selfObject.transitionCoordinator;
-                    [transitionCoordinator containerView].backgroundColor = selfObject.originContainerViewBackgroundColor;
-                }
-                
-                if ([selfObject.navigationController.viewControllers containsObject:selfObject]) {
-                    /**
-                     * 防止一些 childViewController 走到这里
-                     */
-                    selfObject.prefersNavigationBarBackgroundViewHidden = NO;
-                }
+                [selfObject clearTransitionNavigationBarAndReplaceStyle:YES];
                 
                 void (*originSelectorIMP)(id, SEL, BOOL);
                 originSelectorIMP = (void (*)(id, SEL, BOOL))originalIMPProvider();
@@ -70,14 +101,7 @@ typedef UIViewController<ESUINavigationBarAppearanceDelegate> ESUIBarAppearanceC
         
         OverrideInstanceImplementation([UIViewController class], @selector(viewDidDisappear:), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
             return ^(UIViewController *selfObject, BOOL firstArgv) {
-                selfObject.lockTransitionNavigationBar = NO;
-                
-                if (selfObject.transitionNavigationBar) {
-                    /**
-                     * 页面消失完毕的时候移除当前页面的假的navBar
-                     */
-                    [selfObject removeTransitionNavigationBar];
-                }
+                [selfObject clearTransitionNavigationBarAndReplaceStyle:NO];
                 
                 void (*originSelectorIMP)(id, SEL, BOOL);
                 originSelectorIMP = (void (*)(id, SEL, BOOL))originalIMPProvider();
@@ -89,27 +113,38 @@ typedef UIViewController<ESUINavigationBarAppearanceDelegate> ESUIBarAppearanceC
             return ^(UIViewController *selfObject) {
                 id<UIViewControllerTransitionCoordinator> coordinator = selfObject.transitionCoordinator;
                 UIViewController *from = [coordinator viewControllerForKey:UITransitionContextFromViewControllerKey];
-                UIViewController *to = [coordinator viewControllerForKey:UITransitionContextToViewControllerKey];
+                UIViewController *to   = [coordinator viewControllerForKey:UITransitionContextToViewControllerKey];
                 
-                BOOL isCurrentToViewController = (selfObject == selfObject.navigationController.viewControllers.lastObject &&
-                                                  selfObject == to);
-                if (isCurrentToViewController && !selfObject.lockTransitionNavigationBar) {
+                BOOL isCurrentToViewController = NO;
+                if (selfObject == selfObject.navigationController.viewControllers.lastObject &&
+                    selfObject == to) {
+                    isCurrentToViewController = YES;
+                }
+                
+                BOOL isControllerTransiting = NO;
+                if (selfObject.esui_visibleState <  ESUIViewControllerDidAppear ||
+                    selfObject.esui_visibleState >= ESUIViewControllerDidDisappear) {
+                    isControllerTransiting = YES;
+                }
+                
+                if (isCurrentToViewController && isControllerTransiting) {
                     BOOL shouldCustomNavigationBarTransition = NO;
-                    if (!selfObject.transitionNavigationBar) {
-                        UINavigationControllerOperation operation;
-                        if (to.navigationController.topViewController == to) {
-                            operation = UINavigationControllerOperationPush;
-                        } else {
-                            operation = UINavigationControllerOperationPop;
-                        }
-                        
-                        if ([selfObject shouldCustomTransitionAutomaticallyForOperation:operation
-                                                                    firstViewController:from
-                                                                   secondViewController:to]) {
-                            shouldCustomNavigationBarTransition = YES;
-                        }
-                        
-                        if (shouldCustomNavigationBarTransition) {
+                    
+                    UINavigationControllerOperation operation;
+                    if (to.navigationController.esui_isPushing) {
+                        operation = UINavigationControllerOperationPush;
+                    } else {
+                        operation = UINavigationControllerOperationPop;
+                    }
+                    
+                    if ([selfObject shouldCustomTransitionAutomaticallyForOperation:operation
+                                                                firstViewController:from
+                                                               secondViewController:to]) {
+                        shouldCustomNavigationBarTransition = YES;
+                    }
+                    
+                    if (shouldCustomNavigationBarTransition) {
+                        if (!selfObject.transitionNavigationBar) {
                             if (selfObject.navigationController.navigationBar.translucent) {
                                 /**
                                  * 如果原生bar是半透明的，需要给containerView加个背景色，否则有可能会看到下面的默认黑色背景色
@@ -123,6 +158,9 @@ typedef UIViewController<ESUINavigationBarAppearanceDelegate> ESUIBarAppearanceC
                             selfObject.navigationController.navigationBar.transitionNavigationBar = selfObject.transitionNavigationBar;
                             selfObject.prefersNavigationBarBackgroundViewHidden = YES;
                         }
+                    } else {
+                        [from clearTransitionNavigationBarAndReplaceStyle:NO];
+                        [to clearTransitionNavigationBarAndReplaceStyle:NO];
                     }
                 }
                 
@@ -158,6 +196,26 @@ typedef UIViewController<ESUINavigationBarAppearanceDelegate> ESUIBarAppearanceC
     self.transitionNavigationBar = nil;
 }
 
+- (void)clearTransitionNavigationBarAndReplaceStyle:(BOOL)replaceStyle {
+    if (self.transitionNavigationBar) {
+        if (replaceStyle) {
+            [UIViewController replaceStyleForNavigationBar:self.transitionNavigationBar
+                                         withNavigationBar:self.navigationController.navigationBar];
+        }
+        
+        [self removeTransitionNavigationBar];
+        
+        id <UIViewControllerTransitionCoordinator> transitionCoordinator = self.transitionCoordinator;
+        if (self.navigationController.navigationBar.translucent && self.originContainerViewBackgroundColor) {
+            [transitionCoordinator containerView].backgroundColor = self.originContainerViewBackgroundColor;
+        }
+    }
+    
+    if ([self.navigationController.viewControllers containsObject:self]) {
+        self.prefersNavigationBarBackgroundViewHidden = NO;
+    }
+}
+
 - (void)resizeTransitionNavigationBarFrame {
     if (!self.view.esui_visible) {
         return;
@@ -170,106 +228,152 @@ typedef UIViewController<ESUINavigationBarAppearanceDelegate> ESUIBarAppearanceC
 
 #pragma mark - 工具方法
 
-- (void)renderNavigationStyleInViewController:(UIViewController *)viewController animated:(BOOL)animated {
-    if (![viewController.navigationController.viewControllers containsObject:viewController]) {
+- (void)renderNavigationBarStyleAnimated:(BOOL)animated {
+    if (![self.navigationController.viewControllers containsObject:self]) {
         return;
     }
     
-    if ([viewController conformsToProtocol:@protocol(ESUINavigationBarTransitionDelegate)] &&
-        [viewController conformsToProtocol:@protocol(ESUINavigationBarAppearanceDelegate)]) {
-        ESUITransitionViewController *transitionViewController = (ESUITransitionViewController *)viewController;
-   
-        if ([transitionViewController respondsToSelector:@selector(preferredNavigationBarHidden)] &&
-            [transitionViewController preferredNavigationBarHidden]) {
-            if (!viewController.navigationController.isNavigationBarHidden) {
-                [viewController.navigationController setNavigationBarHidden:YES animated:animated];
-            }
-        } else {
-            if (viewController.navigationController.isNavigationBarHidden) {
-                [viewController.navigationController setNavigationBarHidden:NO animated:animated];
-            }
+    if (![self conformsToProtocol:@protocol(ESUINavigationBarTransitionDelegate)] ||
+        ![self conformsToProtocol:@protocol(ESUINavigationBarAppearanceDelegate)]) {
+        return;
+    }
+    
+    UINavigationController *navigationController = self.navigationController;
+    ESUITransitionViewController *transitionViewController = (ESUITransitionViewController *)self;
+
+    if ([transitionViewController respondsToSelector:@selector(preferredNavigationBarHidden)] &&
+        [transitionViewController preferredNavigationBarHidden]) {
+        if (!navigationController.isNavigationBarHidden) {
+            [navigationController setNavigationBarHidden:YES animated:animated];
         }
-        
-        ESUIBarAppearanceController *barAppearanceController = (ESUIBarAppearanceController *)viewController;
-        
-        if ([barAppearanceController respondsToSelector:@selector(navigationBarBackgroundImage)]) {
-            UIImage *backgroundImage = [barAppearanceController navigationBarBackgroundImage];
-            [viewController.navigationController.navigationBar setBackgroundImage:backgroundImage forBarMetrics:UIBarMetricsDefault];
-        } else {
-            UIImage *backgroundImage = [UINavigationBar.appearance backgroundImageForBarMetrics:UIBarMetricsDefault];
-            [viewController.navigationController.navigationBar setBackgroundImage:backgroundImage forBarMetrics:UIBarMetricsDefault];
+    } else {
+        if (navigationController.isNavigationBarHidden) {
+            [navigationController setNavigationBarHidden:NO animated:animated];
         }
-        
-        if ([barAppearanceController respondsToSelector:@selector(navigationBarBarTintColor)]) {
-            UIColor *barTintColor = [barAppearanceController navigationBarBarTintColor];
-            viewController.navigationController.navigationBar.barTintColor = barTintColor;
-        } else {
-            viewController.navigationController.navigationBar.barTintColor = UINavigationBar.appearance.barTintColor;
-        }
-        
-        if ([barAppearanceController respondsToSelector:@selector(navigationBarStyle)]) {
-            UIBarStyle barStyle = [barAppearanceController navigationBarStyle];
-            viewController.navigationController.navigationBar.barStyle = barStyle;
-        } else {
-            viewController.navigationController.navigationBar.barStyle = UINavigationBar.appearance.barStyle;
-        }
-        
-        if ([barAppearanceController respondsToSelector:@selector(navigationBarShadowImage)]) {
-            viewController.navigationController.navigationBar.shadowImage = [barAppearanceController navigationBarShadowImage];
-        } else {
-            viewController.navigationController.navigationBar.shadowImage = NavBarShadowImage;
-        }
-        
-        UIColor *tintColor;
-        if ([barAppearanceController respondsToSelector:@selector(navigationBarTintColor)]) {
-            tintColor = [barAppearanceController navigationBarTintColor];
-        } else {
-            tintColor = NavBarTintColor;
-        }
-        
-        if (tintColor) {
-            if (@available(iOS 11, *)) {
-                if (self.navigationController.esui_isPopping) {
-                    UILabel *backButtonLabel = viewController.navigationController.navigationBar.esui_backButtonLabel;
-                    if (backButtonLabel) {
-                        backButtonLabel.esui_specifiedTextColor = backButtonLabel.textColor;
-                        [viewController esui_animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-                            backButtonLabel.esui_specifiedTextColor = nil;
-                        }];
-                    }
+    }
+    
+    ESUIBarAppearanceController *barAppearanceController = (ESUIBarAppearanceController *)self;
+    
+    /**
+     * 导航栏的背景色
+     */
+    if ([barAppearanceController respondsToSelector:@selector(navigationBarBarTintColor)]) {
+        UIColor *barTintColor = [barAppearanceController navigationBarBarTintColor];
+        navigationController.navigationBar.barTintColor = barTintColor;
+    } else {
+        navigationController.navigationBar.barTintColor = UINavigationBar.appearance.barTintColor;
+    }
+    
+    /**
+     * 导航栏的背景
+     */
+    if ([barAppearanceController respondsToSelector:@selector(navigationBarBackgroundImage)]) {
+        UIImage *backgroundImage = [barAppearanceController navigationBarBackgroundImage];
+        [navigationController.navigationBar setBackgroundImage:backgroundImage forBarMetrics:UIBarMetricsDefault];
+    } else {
+        UIImage *backgroundImage = [UINavigationBar.appearance backgroundImageForBarMetrics:UIBarMetricsDefault];
+        [navigationController.navigationBar setBackgroundImage:backgroundImage forBarMetrics:UIBarMetricsDefault];
+    }
+    
+    /**
+     * 导航栏的 style
+     */
+    if ([barAppearanceController respondsToSelector:@selector(navigationBarStyle)]) {
+        UIBarStyle barStyle = [barAppearanceController navigationBarStyle];
+        navigationController.navigationBar.barStyle = barStyle;
+    } else {
+        navigationController.navigationBar.barStyle = UINavigationBar.appearance.barStyle;
+    }
+    
+    /**
+     * 导航栏底部的分隔线
+     */
+    if ([barAppearanceController respondsToSelector:@selector(navigationBarShadowImage)]) {
+        navigationController.navigationBar.shadowImage = [barAppearanceController navigationBarShadowImage];
+    } else {
+        navigationController.navigationBar.shadowImage = NavBarShadowImage;
+    }
+    
+    /**
+     * 导航栏上控件的主题色
+     */
+    UIColor *tintColor;
+    if ([barAppearanceController respondsToSelector:@selector(navigationBarTintColor)]) {
+        tintColor = [barAppearanceController navigationBarTintColor];
+    } else {
+        tintColor = NavBarTintColor;
+    }
+    
+    if (tintColor) {
+        if (@available(iOS 11, *)) {
+            if (navigationController.esui_isPopping) {
+                UILabel *backButtonLabel = navigationController.navigationBar.esui_backButtonLabel;
+                if (backButtonLabel) {
+                    backButtonLabel.esui_specifiedTextColor = backButtonLabel.textColor;
+                    [self esui_animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+                        backButtonLabel.esui_specifiedTextColor = nil;
+                    }];
                 }
             }
-            
-            [viewController esui_animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-                viewController.navigationController.navigationBar.tintColor = tintColor;
-            } completion:nil];
         }
         
-        UIColor *titleColor;
-        if ([barAppearanceController respondsToSelector:@selector(titleViewTintColor)]) {
-            titleColor = [barAppearanceController titleViewTintColor];
+        [self esui_animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+            navigationController.navigationBar.tintColor = tintColor;
+        } completion:nil];
+    }
+    
+    BOOL shouldRenderTitle = YES;
+    if (@available(iOS 13.0, *)) { } else {
+        if (navigationController.esui_navigationAction >= ESUINavigationActionWillPush &&
+            navigationController.esui_navigationAction <= ESUINavigationActionPushCompleted) {
+            shouldRenderTitle = YES;
         } else {
-            titleColor = NavBarTitleColor;
+            shouldRenderTitle = NO;
+        }
+    }
+    
+    if (shouldRenderTitle) {
+        [self renderNavigationTitleStyleAnimated:animated];
+    }
+}
+
+- (void)renderNavigationTitleStyleAnimated:(BOOL)animated {
+    if (![self.navigationController.viewControllers containsObject:self]) {
+        return;
+    }
+    
+    if (![self conformsToProtocol:@protocol(ESUINavigationBarTransitionDelegate)] ||
+        ![self conformsToProtocol:@protocol(ESUINavigationBarAppearanceDelegate)]) {
+        return;
+    }
+    
+    UINavigationController *navigationController = self.navigationController;
+    ESUIBarAppearanceController *barAppearanceController = (ESUIBarAppearanceController *)self;
+    
+    UIColor *titleColor;
+    if ([barAppearanceController respondsToSelector:@selector(titleViewTintColor)]) {
+        titleColor = [barAppearanceController titleViewTintColor];
+    } else {
+        titleColor = NavBarTitleColor;
+    }
+    
+    if (!barAppearanceController.navigationItem.titleView && titleColor) {
+        NSMutableDictionary<NSAttributedStringKey, id> *titleTextAttributes;
+        NSDictionary *originAttributes = navigationController.navigationBar.titleTextAttributes;
+        if (originAttributes) {
+            titleTextAttributes = [originAttributes mutableCopy];
+        } else {
+            titleTextAttributes = [NSMutableDictionary dictionary];
         }
         
-        if (titleColor) {
-            NSMutableDictionary<NSAttributedStringKey, id> *titleTextAttributes;
-            NSDictionary *originAttributes = viewController.navigationController.navigationBar.titleTextAttributes;
-            if (originAttributes) {
-                titleTextAttributes = [originAttributes mutableCopy];
-            } else {
-                titleTextAttributes = [NSMutableDictionary dictionary];
-            }
-            
-            [titleTextAttributes setObject:titleColor forKey:NSForegroundColorAttributeName];
-            [viewController.navigationController.navigationBar setTitleTextAttributes:titleTextAttributes];
-        }
+        [titleTextAttributes setObject:titleColor forKey:NSForegroundColorAttributeName];
+        [navigationController.navigationBar setTitleTextAttributes:titleTextAttributes];
     }
 }
 
 + (void)replaceStyleForNavigationBar:(UINavigationBar *)navbarA withNavigationBar:(UINavigationBar *)navbarB {
-    navbarB.barStyle = navbarA.barStyle;
-    navbarB.barTintColor = navbarA.barTintColor;
+    [navbarB setBarStyle:navbarA.barStyle];
+    [navbarB setBarTintColor:navbarA.barTintColor];
     [navbarB setShadowImage:navbarA.shadowImage];
     [navbarB setBackgroundImage:[navbarA backgroundImageForBarMetrics:UIBarMetricsDefault] forBarMetrics:UIBarMetricsDefault];
 }
@@ -411,7 +515,13 @@ typedef UIViewController<ESUINavigationBarAppearanceDelegate> ESUIBarAppearanceC
 }
 
 - (UIColor *)containerViewBackgroundColor {
-    UIColor *backgroundColor = [UIColor whiteColor];
+    UIColor *backgroundColor;
+    if (self.isViewLoaded && self.view.backgroundColor) {
+        backgroundColor = self.view.backgroundColor;
+    } else {
+        backgroundColor = [UIColor whiteColor];
+    }
+    
     if ([self conformsToProtocol:@protocol(ESUINavigationBarAppearanceDelegate)]) {
         ESUITransitionViewController *transitionViewController = (ESUITransitionViewController *)self;
         SEL delegateSelector = @selector(containerViewBackgroundColorWhenTransitioning);
@@ -458,18 +568,5 @@ typedef UIViewController<ESUINavigationBarAppearanceDelegate> ESUIBarAppearanceC
 
 - (UIColor *)originContainerViewBackgroundColor {
     return (UIColor *)objc_getAssociatedObject(self, _cmd);
-}
-
-- (void)setLockTransitionNavigationBar:(BOOL)value {
-    objc_setAssociatedObject(self, @selector(lockTransitionNavigationBar), @(value), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (BOOL)lockTransitionNavigationBar {
-    id value = objc_getAssociatedObject(self, _cmd);
-    if (value) {
-        return [value boolValue];
-    }
-    
-    return NO;
 }
 @end

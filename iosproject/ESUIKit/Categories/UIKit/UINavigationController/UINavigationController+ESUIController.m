@@ -37,20 +37,6 @@
     return (UIViewController *)objc_getAssociatedObject(self, _cmd);
 }
 
-- (BOOL)esui_isPushing {
-    if (self.viewControllers.count >= 2) {
-        UIViewController *previousViewController = self.viewControllers[self.viewControllers.count - 2];
-        if (previousViewController == self.esui_endedTransitionTopViewController) {
-            return YES;
-        }
-    }
-    return NO;
-}
-
-- (BOOL)esui_isPopping {
-    return self.esui_topViewController != self.topViewController;
-}
-
 - (UIViewController *)esui_topViewController {
     if (self.esui_isPushing) {
         return self.topViewController;

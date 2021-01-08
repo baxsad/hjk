@@ -63,6 +63,8 @@
 		7B5E4411256D03AD0038D69C /* UIListCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B5E4410256D03AD0038D69C /* UIListCell.m */; };
 		7B5E4417256D21840038D69C /* UIListDemoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B5E4416256D21840038D69C /* UIListDemoViewController.m */; };
 		7B63162325A58CFC009CCAA7 /* NSMethodSignature+ESUI.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B63162225A58CFC009CCAA7 /* NSMethodSignature+ESUI.m */; };
+		7B63178225A71D88009CCAA7 /* UINavigationController+ESUIAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B63178125A71D88009CCAA7 /* UINavigationController+ESUIAction.m */; };
+		7B63178B25A827E1009CCAA7 /* UINavigationBar+NavigationBarTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B63178A25A827E1009CCAA7 /* UINavigationBar+NavigationBarTransition.m */; };
 		7B69C1522521893D00E210FB /* SimplePing.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B69C1502521893D00E210FB /* SimplePing.m */; };
 		7B69C1582521898D00E210FB /* ESCPPing.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B69C1572521898D00E210FB /* ESCPPing.m */; };
 		7B95FC582509F23700D4DC85 /* ESUIWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B95FC572509F23700D4DC85 /* ESUIWindow.m */; };
@@ -84,7 +86,6 @@
 		7BB2BE3D2552CD370026627D /* UIImage+ESUIDrawing.m in Sources */ = {isa = PBXBuildFile; fileRef = 7BB2BE3C2552CD370026627D /* UIImage+ESUIDrawing.m */; };
 		7BDA2D6725087493002D0988 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BDA2D6625087493002D0988 /* Photos.framework */; };
 		7BDA2D692508749C002D0988 /* PhotosUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BDA2D682508749C002D0988 /* PhotosUI.framework */; };
-		7BDCFA6E2555219600C401CA /* UINavigationController+NavigationBarTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = 7BDCFA6D2555219600C401CA /* UINavigationController+NavigationBarTransition.m */; };
 		7BDCFA742555229C00C401CA /* UIViewController+NavigationBarTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = 7BDCFA732555229C00C401CA /* UIViewController+NavigationBarTransition.m */; };
 		7BDCFA7A2555231400C401CA /* ESUITransitionNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7BDCFA792555231400C401CA /* ESUITransitionNavigationBar.m */; };
 		7BE79EA42593394400E255C1 /* UINavigationBar+ESUI.m in Sources */ = {isa = PBXBuildFile; fileRef = 7BE79EA32593394400E255C1 /* UINavigationBar+ESUI.m */; };
@@ -241,6 +242,10 @@
 		7B63172525A70726009CCAA7 /* ESUIKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESUIKit.h; sourceTree = "<group>"; };
 		7B63172625A707A5009CCAA7 /* ESUIComponents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESUIComponents.h; sourceTree = "<group>"; };
 		7B63173725A70C64009CCAA7 /* ESCPKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESCPKit.h; sourceTree = "<group>"; };
+		7B63178025A71D88009CCAA7 /* UINavigationController+ESUIAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UINavigationController+ESUIAction.h"; sourceTree = "<group>"; };
+		7B63178125A71D88009CCAA7 /* UINavigationController+ESUIAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UINavigationController+ESUIAction.m"; sourceTree = "<group>"; };
+		7B63178925A827E1009CCAA7 /* UINavigationBar+NavigationBarTransition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UINavigationBar+NavigationBarTransition.h"; sourceTree = "<group>"; };
+		7B63178A25A827E1009CCAA7 /* UINavigationBar+NavigationBarTransition.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UINavigationBar+NavigationBarTransition.m"; sourceTree = "<group>"; };
 		7B69C1502521893D00E210FB /* SimplePing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SimplePing.m; sourceTree = "<group>"; };
 		7B69C1512521893D00E210FB /* SimplePing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimplePing.h; sourceTree = "<group>"; };
 		7B69C1562521898D00E210FB /* ESCPPing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESCPPing.h; sourceTree = "<group>"; };
@@ -282,8 +287,6 @@
 		7BDA2D6625087493002D0988 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		7BDA2D682508749C002D0988 /* PhotosUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhotosUI.framework; path = System/Library/Frameworks/PhotosUI.framework; sourceTree = SDKROOT; };
 		7BDCFA6525551B2200C401CA /* ESUINavigationBarAppearanceDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESUINavigationBarAppearanceDelegate.h; sourceTree = "<group>"; };
-		7BDCFA6C2555219600C401CA /* UINavigationController+NavigationBarTransition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UINavigationController+NavigationBarTransition.h"; sourceTree = "<group>"; };
-		7BDCFA6D2555219600C401CA /* UINavigationController+NavigationBarTransition.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UINavigationController+NavigationBarTransition.m"; sourceTree = "<group>"; };
 		7BDCFA722555229C00C401CA /* UIViewController+NavigationBarTransition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIViewController+NavigationBarTransition.h"; sourceTree = "<group>"; };
 		7BDCFA732555229C00C401CA /* UIViewController+NavigationBarTransition.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+NavigationBarTransition.m"; sourceTree = "<group>"; };
 		7BDCFA782555231400C401CA /* ESUITransitionNavigationBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESUITransitionNavigationBar.h; sourceTree = "<group>"; };
@@ -455,6 +458,8 @@
 				7B4C879B2552A027007BE94E /* UINavigationController+ESUI.m */,
 				7B4C87A02552A038007BE94E /* UINavigationController+ESUIController.h */,
 				7B4C87A12552A038007BE94E /* UINavigationController+ESUIController.m */,
+				7B63178025A71D88009CCAA7 /* UINavigationController+ESUIAction.h */,
+				7B63178125A71D88009CCAA7 /* UINavigationController+ESUIAction.m */,
 			);
 			path = UINavigationController;
 			sourceTree = "<group>";
@@ -841,8 +846,8 @@
 				7BDCFA792555231400C401CA /* ESUITransitionNavigationBar.m */,
 				7BDCFA722555229C00C401CA /* UIViewController+NavigationBarTransition.h */,
 				7BDCFA732555229C00C401CA /* UIViewController+NavigationBarTransition.m */,
-				7BDCFA6C2555219600C401CA /* UINavigationController+NavigationBarTransition.h */,
-				7BDCFA6D2555219600C401CA /* UINavigationController+NavigationBarTransition.m */,
+				7B63178925A827E1009CCAA7 /* UINavigationBar+NavigationBarTransition.h */,
+				7B63178A25A827E1009CCAA7 /* UINavigationBar+NavigationBarTransition.m */,
 				7BE79EAF2594340A00E255C1 /* UILabel+NavigationBarTransition.h */,
 				7BE79EB02594340A00E255C1 /* UILabel+NavigationBarTransition.m */,
 			);
@@ -1115,6 +1120,7 @@
 				7BB2BE1F2552CB560026627D /* UIImage+ESUIFilter.m in Sources */,
 				7BEB44C424F8DC36003C167D /* ESCPRouterUtilities.m in Sources */,
 				7B44194025223379003EA21E /* UIColor+ESUI.m in Sources */,
+				7B63178225A71D88009CCAA7 /* UINavigationController+ESUIAction.m in Sources */,
 				7B171694250B5BFE00C40B88 /* UIArtemisViewController.m in Sources */,
 				7B4418B32521B09F003EA21E /* NSObject+MJClass.m in Sources */,
 				7B4C87B22552A393007BE94E /* UIView+ESUIStatus.m in Sources */,
@@ -1135,6 +1141,7 @@
 				7BDCFA7A2555231400C401CA /* ESUITransitionNavigationBar.m in Sources */,
 				7B4418B72521B09F003EA21E /* MJFoundation.m in Sources */,
 				7B4419082521E9A2003EA21E /* ESCPHostTools.m in Sources */,
+				7B63178B25A827E1009CCAA7 /* UINavigationBar+NavigationBarTransition.m in Sources */,
 				7B9B850C254FD69100029720 /* NSObject+ESUIKVC.m in Sources */,
 				7B4C87B82552A3A6007BE94E /* UIView+ESUIController.m in Sources */,
 				7B9B8500254FAFE500029720 /* NSObject+ESUIRuntime.m in Sources */,
@@ -1187,7 +1194,6 @@
 				7B4FD54424F3CEC200D0A376 /* UIApplication+ESUI.m in Sources */,
 				7BF2172524F6327E0038C2D7 /* SIMManager.m in Sources */,
 				7BE79EA42593394400E255C1 /* UINavigationBar+ESUI.m in Sources */,
-				7BDCFA6E2555219600C401CA /* UINavigationController+NavigationBarTransition.m in Sources */,
 				7B37EC93251328C100EDBF93 /* SIMTools.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

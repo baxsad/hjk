@@ -10,5 +10,5 @@
 #import "ESUINavigationBarAppearanceDelegate.h"
 #import "ESUITransitionNavigationBar.h"
 #import "UIViewController+NavigationBarTransition.h"
-#import "UINavigationController+NavigationBarTransition.h"
+#import "UINavigationBar+NavigationBarTransition.h"
 #import "ESUIWeakObjectContainer.h"
